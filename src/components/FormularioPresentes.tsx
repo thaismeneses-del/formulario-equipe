@@ -167,12 +167,14 @@ const FormularioPresentes: React.FC = () => {
                 <input
                   type="text"
                   id="nome"
+                  name="nome"
                   value={formData.nome}
                   onChange={(e) => handleInputChange('nome', e.target.value)}
-                  className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base ${
+                  className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base relative z-10 ${
                     errors.nome ? 'border-red-500 bg-red-50' : 'border-gray-200 hover:border-blue-300'
                   }`}
-                  placeholder="Digite seu nome completo"
+                  placeholder="Digite seu nome e sobrenome"
+                  autoComplete="name"
                 />
                 {errors.nome && <p className="text-red-500 text-sm mt-3 flex items-center">
                   <AlertTriangle className="w-4 h-4 mr-2" />
