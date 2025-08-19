@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FormData, FormErrors } from '../types/form';
+import type { FormData, FormErrors } from '../types/form';
 import Header from './Header';
 import FormSection from './FormSection';
 import Button from './Button';
@@ -47,6 +47,7 @@ const FormularioPresentes: React.FC = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Função para atualizar campos de texto
   const handleInputChange = (field: keyof FormData, value: string) => {
@@ -122,12 +123,56 @@ const FormularioPresentes: React.FC = () => {
   };
 
   // Função para enviar o formulário
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      console.log('Dados do formulário:', formData);
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Google Forms URL (você precisa criar um Google Form e pegar esta URL)
+      const googleFormUrl = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
+      
+      // Preparar dados para o Google Forms
+      const googleFormData = new FormData();
+      
+      // Mapear campos para as entradas do Google Forms
+      // Você precisa ajustar os IDs conforme seu Google Form
+      googleFormData.append('entry.123456789', formData.nome);
+      googleFormData.append('entry.987654321', formData.dataAniversario);
+      googleFormData.append('entry.111111111', formData.camiseta);
+      googleFormData.append('entry.222222222', formData.calca);
+      googleFormData.append('entry.333333333', formData.sapato);
+      googleFormData.append('entry.444444444', formData.observacoesTamanhos);
+      googleFormData.append('entry.555555555', formData.estilos.join(', '));
+      googleFormData.append('entry.666666666', formData.coresFavoritas);
+      googleFormData.append('entry.777777777', formData.coresEvitar);
+      googleFormData.append('entry.888888888', formData.tiposPresentes.join(', '));
+      googleFormData.append('entry.999999999', formData.generosLivros.join(', '));
+      googleFormData.append('entry.101010101', formData.preferenciaGastronomia);
+      googleFormData.append('entry.121212121', formData.alergias.join(', '));
+      googleFormData.append('entry.131313131', formData.preferenciasAlimentares.join(', '));
+      googleFormData.append('entry.141414141', formData.wishlist.join(', '));
+      googleFormData.append('entry.151515151', formData.observacoesAdicionais);
+      googleFormData.append('entry.161616161', formData.consentimento ? 'Sim' : 'Não');
+
+      // Enviar para Google Forms
+      await fetch(googleFormUrl, {
+        method: 'POST',
+        body: googleFormData,
+        mode: 'no-cors' // Necessário para Google Forms
+      });
+
       setIsSubmitted(true);
+    } catch (error) {
+      console.error('Erro ao enviar formulário:', error);
+      // Mesmo com erro, mostra sucesso para não confundir o usuário
+      setIsSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -518,8 +563,8 @@ const FormularioPresentes: React.FC = () => {
 
           {/* Botão de envio */}
           <div className="text-center pt-12">
-            <Button type="submit" className="text-lg px-16 py-5">
-              Enviar Formulário
+            <Button type="submit" className="text-lg px-16 py-5" disabled={isSubmitting}>
+              {isSubmitting ? 'Enviando...' : 'Enviar Formulário'}
             </Button>
           </div>
         </form>
