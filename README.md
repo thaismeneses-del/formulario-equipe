@@ -1,46 +1,86 @@
-# Getting Started with Create React App
+# Formulário de Preferências de Presentes 🎁
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Um formulário digital moderno e responsivo para coletar informações sobre preferências de presentes de aniversário da equipe.
 
-## Available Scripts
+## 🚀 Características
 
-In the project directory, you can run:
+- **Interface moderna**: Design limpo e amigável com TailwindCSS
+- **Totalmente responsivo**: Funciona perfeitamente em desktop, tablet e mobile
+- **Validação inteligente**: Campos obrigatórios e validação em tempo real
+- **Lógica condicional**: Perguntas extras aparecem apenas quando relevante
+- **Linguagem acolhedora**: Tom de conversa leve entre colegas
+- **Estrutura modular**: Cada seção bem organizada e identificada
 
-### `npm start`
+## 📋 Seções do Formulário
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. **Boas-vindas** - Mensagem inicial acolhedora
+2. **Identificação** - Nome e data de aniversário
+3. **Tamanhos** - Camiseta, calça, sapato e observações
+4. **Preferências** - Estilo pessoal e cores
+5. **Tipos de presentes** - Categorias com perguntas condicionais
+6. **Restrições** - Alergias e preferências alimentares
+7. **Wishlist** - Links de produtos e observações
+8. **Consentimento** - Autorização para uso das informações
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 🛠️ Tecnologias Utilizadas
 
-### `npm test`
+- **React 18** com TypeScript
+- **TailwindCSS** para estilização
+- **HTML5** semântico
+- **CSS3** moderno
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Como Executar
 
-### `npm run build`
+1. **Instalar dependências**:
+   ```bash
+   npm install
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. **Executar em modo de desenvolvimento**:
+   ```bash
+   npm start
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. **Abrir no navegador**:
+   O projeto estará disponível em `http://localhost:3000`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📦 Scripts Disponíveis
 
-### `npm run eject`
+- `npm start` - Executa o projeto em modo de desenvolvimento
+- `npm run build` - Cria a versão de produção
+- `npm test` - Executa os testes
+- `npm run eject` - Ejecta a configuração (irreversível)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 🎨 Personalização
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+O formulário foi estruturado de forma modular, permitindo fácil customização:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- **Cores**: Modifique as classes do TailwindCSS no componente
+- **Campos**: Adicione ou remova campos editando o tipo `FormData`
+- **Validação**: Ajuste as regras na função `validateForm`
+- **Layout**: Modifique as classes de grid e espaçamento
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 📱 Responsividade
 
-## Learn More
+O formulário é totalmente responsivo e se adapta a diferentes tamanhos de tela:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **Desktop**: Layout em 3 colunas para tamanhos
+- **Tablet**: Layout em 2 colunas para checkboxes
+- **Mobile**: Layout em 1 coluna para melhor usabilidade
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔒 Privacidade
+
+- Apenas campos essenciais são obrigatórios
+- Consentimento explícito para uso das informações
+- Dados coletados apenas para fins internos
+
+## 💡 Funcionalidades Especiais
+
+- **Perguntas condicionais**: Seções extras aparecem baseadas nas respostas
+- **Validação em tempo real**: Erros são mostrados imediatamente
+- **Feedback visual**: Estados de hover, focus e erro bem definidos
+- **Mensagem de agradecimento**: Tela final após envio bem-sucedido
+
+## 📄 Licença
+
+Este projeto foi criado para uso interno da equipe.
