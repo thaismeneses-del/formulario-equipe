@@ -133,31 +133,30 @@ const FormularioPresentes: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Google Forms URL (você precisa criar um Google Form e pegar esta URL)
-      const googleFormUrl = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
+      // Google Forms URL - Formulário criado automaticamente
+      const googleFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScm3QcqpYqqNHMGbH2Zy2UmYjhLGQHtDk9cJy0mhBkaK_G-IA/formResponse';
       
       // Preparar dados para o Google Forms
       const googleFormData = new FormData();
       
-      // Mapear campos para as entradas do Google Forms
-      // Você precisa ajustar os IDs conforme seu Google Form
-      googleFormData.append('entry.123456789', formData.nome);
-      googleFormData.append('entry.987654321', formData.dataAniversario);
-      googleFormData.append('entry.111111111', formData.camiseta);
-      googleFormData.append('entry.222222222', formData.calca);
-      googleFormData.append('entry.333333333', formData.sapato);
-      googleFormData.append('entry.444444444', formData.observacoesTamanhos);
-      googleFormData.append('entry.555555555', formData.estilos.join(', '));
-      googleFormData.append('entry.666666666', formData.coresFavoritas);
-      googleFormData.append('entry.777777777', formData.coresEvitar);
-      googleFormData.append('entry.888888888', formData.tiposPresentes.join(', '));
-      googleFormData.append('entry.999999999', formData.generosLivros.join(', '));
-      googleFormData.append('entry.101010101', formData.preferenciaGastronomia);
-      googleFormData.append('entry.121212121', formData.alergias.join(', '));
-      googleFormData.append('entry.131313131', formData.preferenciasAlimentares.join(', '));
-      googleFormData.append('entry.141414141', formData.wishlist.join(', '));
-      googleFormData.append('entry.151515151', formData.observacoesAdicionais);
-      googleFormData.append('entry.161616161', formData.consentimento ? 'Sim' : 'Não');
+      // Mapear campos para as entradas do Google Forms com IDs corretos
+      googleFormData.append('entry.1966063435', formData.nome); // Nome e sobrenome
+      googleFormData.append('entry.778570144', formData.dataAniversario); // Dia e mês do aniversário
+      googleFormData.append('entry.1425101511', formData.camiseta); // Tamanho camiseta
+      googleFormData.append('entry.1758197486', formData.calca); // Tamanho calça
+      googleFormData.append('entry.583832894', formData.sapato); // Tamanho sapato
+      googleFormData.append('entry.566582541', formData.observacoesTamanhos); // Observações sobre tamanhos
+      googleFormData.append('entry.1808286342', formData.estilos.join(', ')); // Estilo pessoal
+      googleFormData.append('entry.78644252', formData.coresFavoritas); // Cores favoritas
+      googleFormData.append('entry.531590663', formData.coresEvitar); // Cores/estampas a evitar
+      googleFormData.append('entry.167926708', formData.tiposPresentes.join(', ')); // Tipos de presentes
+      googleFormData.append('entry.1044244207', formData.generosLivros.join(', ')); // Gêneros de livros preferidos
+      googleFormData.append('entry.837435145', formData.preferenciaGastronomia); // Preferência gastronomia
+      googleFormData.append('entry.1541869414', formData.alergias.join(', ')); // Alergias/intolerâncias
+      googleFormData.append('entry.568898002', formData.preferenciasAlimentares.join(', ')); // Preferências alimentares
+      googleFormData.append('entry.525365393', formData.wishlist.join(', ')); // Wishlist (links de produtos/lojas)
+      googleFormData.append('entry.1516819302', formData.observacoesAdicionais); // Observações adicionais
+      googleFormData.append('entry.330769115', formData.consentimento ? 'Sim' : 'Não'); // Consentimento
 
       // Enviar para Google Forms
       await fetch(googleFormUrl, {
