@@ -585,12 +585,47 @@ const FormularioPresentes: React.FC = () => {
             </div>
           </FormSection>
 
-          {/* Botão de envio */}
-          <div className="text-center pt-12">
-            <Button type="submit" className="text-lg px-16 py-5" disabled={isSubmitting}>
-              {isSubmitting ? 'Enviando...' : 'Enviar Formulário'}
-            </Button>
-          </div>
+                      {/* Botão de envio */}
+            <div className="text-center pt-12 space-y-4">
+              <Button type="submit" className="text-lg px-16 py-5" disabled={isSubmitting}>
+                {isSubmitting ? 'Enviando...' : 'Enviar Formulário'}
+              </Button>
+              
+              {/* Botão de teste */}
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('🧪 Testando Formspree...');
+                    const testData = {
+                      nome: 'Teste Automático',
+                      dataAniversario: '15/03',
+                      camiseta: 'M',
+                      consentimento: 'Sim'
+                    };
+                    
+                    try {
+                      const response = await fetch('https://formspree.io/f/xzzvlgde', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(testData)
+                      });
+                      
+                      if (response.ok) {
+                        alert('✅ Teste enviado com sucesso! Verifique seu email.');
+                      } else {
+                        alert(`❌ Erro: ${response.status}`);
+                      }
+                                         } catch (error) {
+                       alert('❌ Erro no teste: ' + (error as Error).message);
+                     }
+                  }}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm"
+                >
+                  🧪 Testar Envio
+                </button>
+              </div>
+            </div>
         </form>
       </div>
       <Footer />
