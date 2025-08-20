@@ -169,16 +169,17 @@ const FormularioPresentes: React.FC = () => {
         });
         
         // Log para debug
-        console.log('Dados enviados para Google Forms:', {
-          nome: formData.nome,
-          dataAniversario: formData.dataAniversario,
-          camiseta: formData.camiseta,
-          consentimento: formData.consentimento
-        });
+        console.log('Dados enviados para Formspree:', formspreeData);
+        console.log('Resposta do Formspree:', response.status, response.statusText);
         
-        setIsSubmitted(true);
+        if (response.ok) {
+          console.log('✅ Formulário enviado com sucesso para Formspree!');
+          setIsSubmitted(true);
+        } else {
+          throw new Error(`Erro HTTP: ${response.status}`);
+        }
       } catch (error) {
-        console.error('Erro ao enviar para Google Forms:', error);
+        console.error('Erro ao enviar para Formspree:', error);
         
         // Fallback: salvar no localStorage como backup
         const backupData = {
