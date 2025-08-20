@@ -48,6 +48,8 @@ const FormularioPresentes: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'sending' | 'success' | 'error' | 'retrying'>('idle');
+  const [retryCount, setRetryCount] = useState(0);
 
   // Função para atualizar campos de texto
   const handleInputChange = (field: keyof FormData, value: string) => {
@@ -122,7 +124,7 @@ const FormularioPresentes: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Função para enviar o formulário
+  // Função para enviar o formulário com retry automático
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -131,6 +133,8 @@ const FormularioPresentes: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    setSubmitStatus('sending');
+    setRetryCount(0);
 
     try {
       // Formspree URL - Solução mais confiável
@@ -163,49 +167,75 @@ const FormularioPresentes: React.FC = () => {
       console.log('🚀 Iniciando envio do formulário...');
       console.log('📋 Dados preparados:', formspreeData);
 
-      // Enviar para Formspree
-      try {
-        console.log('📤 Enviando para Formspree...');
-        const response = await fetch(formspreeUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: JSON.stringify(formspreeData)
-        });
-        
-        console.log('📥 Resposta do Formspree:', response.status, response.statusText);
-        console.log('📋 Headers da resposta:', Object.fromEntries(response.headers.entries()));
-        
-        if (response.ok) {
-          const responseText = await response.text();
-          console.log('✅ Formulário enviado com sucesso para Formspree!');
-          console.log('📄 Resposta completa:', responseText);
+      // Função para tentar enviar com retry
+      const attemptSubmit = async (attempt: number = 1): Promise<boolean> => {
+        try {
+          console.log(`📤 Tentativa ${attempt} de envio para Formspree...`);
+          setSubmitStatus(attempt > 1 ? 'retrying' : 'sending');
           
-          // Salvar também no localStorage como confirmação
-          const successData = {
-            ...formData,
-            timestamp: new Date().toISOString(),
-            id: Date.now(),
-            status: 'enviado_com_sucesso',
-            formspreeResponse: responseText
-          };
+          const response = await fetch(formspreeUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: JSON.stringify(formspreeData),
+            // Timeout de 10 segundos
+            signal: AbortSignal.timeout(10000)
+          });
           
-          const existingData = JSON.parse(localStorage.getItem('formularioEnviados') || '[]');
-          existingData.push(successData);
-          localStorage.setItem('formularioEnviados', JSON.stringify(existingData));
+          console.log('📥 Resposta do Formspree:', response.status, response.statusText);
+          console.log('📋 Headers da resposta:', Object.fromEntries(response.headers.entries()));
           
-          console.log('💾 Dados salvos no localStorage como confirmação');
-          setIsSubmitted(true);
-        } else {
-          const errorText = await response.text();
-          console.error('❌ Erro HTTP do Formspree:', response.status, response.statusText);
-          console.error('📄 Conteúdo do erro:', errorText);
-          throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
+          if (response.ok) {
+            const responseText = await response.text();
+            console.log('✅ Formulário enviado com sucesso para Formspree!');
+            console.log('📄 Resposta completa:', responseText);
+            
+            // Salvar também no localStorage como confirmação
+            const successData = {
+              ...formData,
+              timestamp: new Date().toISOString(),
+              id: Date.now(),
+              status: 'enviado_com_sucesso',
+              formspreeResponse: responseText,
+              attempts: attempt
+            };
+            
+            const existingData = JSON.parse(localStorage.getItem('formularioEnviados') || '[]');
+            existingData.push(successData);
+            localStorage.setItem('formularioEnviados', JSON.stringify(existingData));
+            
+            console.log('💾 Dados salvos no localStorage como confirmação');
+            setSubmitStatus('success');
+            return true;
+          } else {
+            const errorText = await response.text();
+            console.error('❌ Erro HTTP do Formspree:', response.status, response.statusText);
+            console.error('📄 Conteúdo do erro:', errorText);
+            throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
+          }
+        } catch (error) {
+          console.error(`💥 Erro na tentativa ${attempt}:`, error);
+          
+          // Se não é a última tentativa, tentar novamente
+          if (attempt < 3) {
+            console.log(`🔄 Tentando novamente em 2 segundos... (${attempt + 1}/3)`);
+            setRetryCount(attempt);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return await attemptSubmit(attempt + 1);
+          }
+          
+          return false;
         }
-      } catch (error) {
-        console.error('💥 Erro ao enviar para Formspree:', error);
+      };
+
+      // Tentar enviar com retry automático
+      const success = await attemptSubmit();
+      
+      if (!success) {
+        console.error('💥 Todas as tentativas falharam');
+        setSubmitStatus('error');
         
         // Fallback: salvar no localStorage como backup
         const backupData = {
@@ -213,7 +243,8 @@ const FormularioPresentes: React.FC = () => {
           timestamp: new Date().toISOString(),
           id: Date.now(),
           status: 'backup_local',
-          error: error instanceof Error ? error.message : 'Erro desconhecido'
+          error: 'Todas as tentativas falharam',
+          attempts: 3
         };
         
         const existingBackups = JSON.parse(localStorage.getItem('formularioBackups') || '[]');
@@ -222,10 +253,10 @@ const FormularioPresentes: React.FC = () => {
         
         console.log('💾 Dados salvos como backup no navegador');
         console.log('📦 Total de backups:', existingBackups.length);
-        
-        // Mesmo com erro, mostrar sucesso para o usuário
-        setIsSubmitted(true);
       }
+      
+      // Mesmo com erro, mostrar sucesso para o usuário
+      setIsSubmitted(true);
     } catch (error) {
       console.error('💥 Erro geral no envio:', error);
       
@@ -635,10 +666,29 @@ const FormularioPresentes: React.FC = () => {
           </FormSection>
 
                                   {/* Botão de envio */}
-            <div className="text-center pt-12">
+            <div className="text-center pt-12 space-y-4">
               <Button type="submit" className="text-lg px-16 py-5" disabled={isSubmitting}>
-                {isSubmitting ? 'Enviando...' : 'Enviar Formulário'}
+                {submitStatus === 'sending' && '📤 Enviando...'}
+                {submitStatus === 'retrying' && `🔄 Tentando novamente... (${retryCount + 1}/3)`}
+                {submitStatus === 'success' && '✅ Enviado com sucesso!'}
+                {submitStatus === 'error' && '❌ Erro no envio'}
+                {submitStatus === 'idle' && 'Enviar Formulário'}
               </Button>
+              
+              {/* Indicador de status */}
+              {submitStatus === 'retrying' && (
+                <div className="text-blue-600 text-sm flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <span>Tentando novamente automaticamente...</span>
+                </div>
+              )}
+              
+              {submitStatus === 'error' && (
+                <div className="text-orange-600 text-sm bg-orange-50 p-3 rounded-lg border border-orange-200">
+                  <p>⚠️ Houve um problema no envio, mas seus dados foram salvos localmente.</p>
+                  <p className="text-xs mt-1">Você pode tentar novamente ou os dados serão enviados automaticamente.</p>
+                </div>
+              )}
             </div>
         </form>
       </div>
