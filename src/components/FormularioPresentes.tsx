@@ -159,17 +159,39 @@ const FormularioPresentes: React.FC = () => {
       googleFormData.append('entry.330769115', formData.consentimento ? 'Sim' : 'Não'); // Consentimento
 
       // Enviar para Google Forms
-      await fetch(googleFormUrl, {
-        method: 'POST',
-        body: googleFormData,
-        mode: 'no-cors' // Necessário para Google Forms
-      });
-
-      setIsSubmitted(true);
-    } catch (error) {
-      console.error('Erro ao enviar formulário:', error);
-      // Mesmo com erro, mostra sucesso para não confundir o usuário
-      setIsSubmitted(true);
+      try {
+        await fetch(googleFormUrl, {
+          method: 'POST',
+          body: googleFormData,
+          mode: 'no-cors' // Necessário para Google Forms
+        });
+        
+        // Log para debug
+        console.log('Dados enviados para Google Forms:', {
+          nome: formData.nome,
+          dataAniversario: formData.dataAniversario,
+          camiseta: formData.camiseta,
+          consentimento: formData.consentimento
+        });
+        
+        setIsSubmitted(true);
+      } catch (error) {
+        console.error('Erro ao enviar para Google Forms:', error);
+        
+        // Fallback: salvar no localStorage como backup
+        const backupData = {
+          ...formData,
+          timestamp: new Date().toISOString(),
+          id: Date.now()
+        };
+        
+        const existingBackups = JSON.parse(localStorage.getItem('formularioBackups') || '[]');
+        existingBackups.push(backupData);
+        localStorage.setItem('formularioBackups', JSON.stringify(existingBackups));
+        
+        console.log('Dados salvos como backup no navegador');
+        setIsSubmitted(true);
+      }
     } finally {
       setIsSubmitting(false);
     }
