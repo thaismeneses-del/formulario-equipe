@@ -155,46 +155,95 @@ const FormularioPresentes: React.FC = () => {
         wishlist: formData.wishlist.join(', '),
         observacoesAdicionais: formData.observacoesAdicionais,
         consentimento: formData.consentimento ? 'Sim' : 'Não',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
       };
+
+      console.log('🚀 Iniciando envio do formulário...');
+      console.log('📋 Dados preparados:', formspreeData);
 
       // Enviar para Formspree
       try {
+        console.log('📤 Enviando para Formspree...');
         const response = await fetch(formspreeUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
           body: JSON.stringify(formspreeData)
         });
         
-        // Log para debug
-        console.log('Dados enviados para Formspree:', formspreeData);
-        console.log('Resposta do Formspree:', response.status, response.statusText);
+        console.log('📥 Resposta do Formspree:', response.status, response.statusText);
+        console.log('📋 Headers da resposta:', Object.fromEntries(response.headers.entries()));
         
         if (response.ok) {
+          const responseText = await response.text();
           console.log('✅ Formulário enviado com sucesso para Formspree!');
+          console.log('📄 Resposta completa:', responseText);
+          
+          // Salvar também no localStorage como confirmação
+          const successData = {
+            ...formData,
+            timestamp: new Date().toISOString(),
+            id: Date.now(),
+            status: 'enviado_com_sucesso',
+            formspreeResponse: responseText
+          };
+          
+          const existingData = JSON.parse(localStorage.getItem('formularioEnviados') || '[]');
+          existingData.push(successData);
+          localStorage.setItem('formularioEnviados', JSON.stringify(existingData));
+          
+          console.log('💾 Dados salvos no localStorage como confirmação');
           setIsSubmitted(true);
         } else {
-          throw new Error(`Erro HTTP: ${response.status}`);
+          const errorText = await response.text();
+          console.error('❌ Erro HTTP do Formspree:', response.status, response.statusText);
+          console.error('📄 Conteúdo do erro:', errorText);
+          throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
         }
       } catch (error) {
-        console.error('Erro ao enviar para Formspree:', error);
+        console.error('💥 Erro ao enviar para Formspree:', error);
         
         // Fallback: salvar no localStorage como backup
         const backupData = {
           ...formData,
           timestamp: new Date().toISOString(),
-          id: Date.now()
+          id: Date.now(),
+          status: 'backup_local',
+          error: error instanceof Error ? error.message : 'Erro desconhecido'
         };
         
         const existingBackups = JSON.parse(localStorage.getItem('formularioBackups') || '[]');
         existingBackups.push(backupData);
         localStorage.setItem('formularioBackups', JSON.stringify(existingBackups));
         
-        console.log('Dados salvos como backup no navegador');
+        console.log('💾 Dados salvos como backup no navegador');
+        console.log('📦 Total de backups:', existingBackups.length);
+        
+        // Mesmo com erro, mostrar sucesso para o usuário
         setIsSubmitted(true);
       }
+    } catch (error) {
+      console.error('💥 Erro geral no envio:', error);
+      
+      // Último recurso: salvar no localStorage
+      const emergencyData = {
+        ...formData,
+        timestamp: new Date().toISOString(),
+        id: Date.now(),
+        status: 'emergencia_local',
+        error: error instanceof Error ? error.message : 'Erro geral'
+      };
+      
+      const existingEmergency = JSON.parse(localStorage.getItem('formularioEmergencia') || '[]');
+      existingEmergency.push(emergencyData);
+      localStorage.setItem('formularioEmergencia', JSON.stringify(existingEmergency));
+      
+      console.log('🚨 Dados salvos em emergência no navegador');
+      setIsSubmitted(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -571,7 +620,7 @@ const FormularioPresentes: React.FC = () => {
                 <input
                   type="checkbox"
                   checked={formData.consentimento}
-                  onChange={(e) => handleInputChange('consentimento', e.target.checked.toString())}
+                  onChange={(e) => setFormData(prev => ({ ...prev, consentimento: e.target.checked }))}
                   className="w-6 h-6 text-green-600 border-gray-300 rounded focus:ring-green-500 mt-0.5"
                 />
                 <span className="text-gray-700 leading-relaxed text-base">
